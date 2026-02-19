@@ -6,7 +6,28 @@ import { user_repository } from "../repositories/user_respository";
 import { app_error } from "@/lib/app_error";
 import { auth_error_type } from "../constants/auth_errors";
 import { http_status } from "@/lib/http_status";
+import { token_utils } from "@/lib/jwt_utils";
+import { refresh_token_repository } from "../repositories/refresh_token_repository";
 
+
+const issue_token_pair = async (user_id: string, email: string) => {
+  const access_token = await token_utils.sign_access_token({ user_id, email });
+  const refresh_token = token_utils.generate_refresh_token();
+  
+  const token_hash = token_utils.hash_refresh_token(refresh_token);
+  
+  const expires_at = new Date();
+  expires_at.setDate(expires_at.getDate() + 7); // Expires in 7 days
+
+  await refresh_token_repository.create_token(
+    crypto.randomUUID(),
+    user_id,
+    token_hash,
+    expires_at
+  );
+
+  return { access_token, refresh_token };
+};
 export const auth_service = {
   register_new_user: async (user_data: sign_up_type) => {
     const existing_user = await user_repository.find_by_email(user_data.email);
@@ -29,7 +50,12 @@ export const auth_service = {
       hashed_password
     );
 
-    return new_user_id;
+    const tokens = await issue_token_pair(new_user_id, user_data.email);
+
+    return { 
+      user: { id: new_user_id, full_name: user_data.full_name, email: user_data.email },
+      ...tokens 
+    };
   },
 
 
@@ -55,12 +81,18 @@ export const auth_service = {
       );
     }
 
+    
+    const tokens = await issue_token_pair(user.id, user.email);
+    
     // critical: do not return hashed password
     return {
-      id: user.id,
-      full_name: user.full_name,
-      email: user.email,
+      user: { id: user.id, full_name: user.full_name, email: user.email },
+      ...tokens
     };
   },
+
+  
+
+
 
 };

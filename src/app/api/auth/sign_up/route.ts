@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { sign_up_schema } from "@/features/auth/validations/auth_schema";
 import { auth_service } from "@/features/auth/services/auth_service";
 import { app_error } from "@/lib/app_error";
 import { http_status } from "@/lib/http_status";
-import { cookies } from "next/headers";
-import { jwt_utils } from "@/lib/jwt_utils";
 
 export const runtime = "nodejs";
 
@@ -19,28 +18,39 @@ export async function POST(request: Request) {
         { status: http_status.bad_request }
       );
     }
-    const { email, full_name } = validation_result.data;
-    const user_id = await auth_service.register_new_user(validation_result.data);
-    const token = await jwt_utils.sign_token({
-      user_id: user_id,
-      email: email,
-    });
+
+
+    const { user, access_token, refresh_token } = await auth_service.register_new_user(validation_result.data);
 
     const cookie_store = await cookies();
+    const is_production = process.env.NODE_ENV === "production";
+
+    // short-lived Access Token
     cookie_store.set({
-      name: "auth_session",
-      value: token,
+      name: "access_token",
+      value: access_token,
       httpOnly: true,     
-      secure: process.env.NODE_ENV === "production", 
+      secure: is_production, 
       sameSite: "lax",    
       path: "/",          
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 15, 
+    });
+
+    // long-lived Refresh Token
+    cookie_store.set({
+      name: "refresh_token",
+      value: refresh_token,
+      httpOnly: true,     
+      secure: is_production, 
+      sameSite: "lax",    
+      path: "/",          
+      maxAge: 60 * 60 * 24 * 7, 
     });
 
     return NextResponse.json(
       { 
         message: "Account created and logged in successfully", 
-        user: { id: user_id, full_name, email } 
+        user 
       },
       { status: http_status.created }
     );
