@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { sign_up_schema } from "@/features/auth/validations/auth_schema";
 import { auth_service } from "@/features/auth/services/auth_service";
-
-export const runtime = "nodejs";
+import { app_error } from "@/lib/app_error";
+import { http_status } from "@/lib/http_status";
 
 export async function POST(request: Request) {
   try {
@@ -12,30 +12,29 @@ export async function POST(request: Request) {
     if (!validation_result.success) {
       return NextResponse.json(
         { error: "Invalid data", details: validation_result.error.flatten().fieldErrors },
-        { status: 400 }
+        { status: http_status.bad_request }
       );
     }
 
-    // Simply hand the validated data to the service layer
     const user_id = await auth_service.register_new_user(validation_result.data);
 
     return NextResponse.json(
       { message: "User created successfully", user_id },
-      { status: 201 }
+      { status: http_status.created }
     );
 
   } catch (error) {
-    if (error instanceof Error && error.message === "user_exists") {
+    if (error instanceof app_error) {
       return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
+        { error: error.message, code: error.code },
+        { status: error.status_code }
       );
     }
 
     console.error("Sign up controller error:", error);
     return NextResponse.json(
       { error: "An internal server error occurred" },
-      { status: 500 }
+      { status: http_status.internal_server_error }
     );
   }
 }

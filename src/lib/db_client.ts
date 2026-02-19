@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise";
+import mysql from "mysql2/promise"; // mysql2/promise allows db_pool.query instead of a callback hell
 
 
 if (!process.env.DATABASE_URL) {
@@ -8,7 +8,7 @@ if (!process.env.DATABASE_URL) {
 // Create the connection pool once and export it
 export const db_pool = mysql.createPool({
   uri: process.env.DATABASE_URL,
-  waitForConnections: true,
+  waitForConnections: true, // false-> throws an error if connections are busy
   connectionLimit: 10, 
   queueLimit: 0,
 });

@@ -25,13 +25,11 @@ export const SignUpForm = () => {
     const result = await response.json();
 
     if (!response.ok) {
-      // You can trigger a toast notification here
       alert(result.error || "Something went wrong");
       return;
     }
 
     alert("Account created successfully!");
-    // Redirect user to login or dashboard here
   } catch (error) {
     console.error("Submission error:", error);
     alert("Failed to connect to the server.");
