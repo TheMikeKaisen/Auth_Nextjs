@@ -3,6 +3,8 @@ import { login_schema } from "@/features/auth/validations/auth_schema";
 import { auth_service } from "@/features/auth/services/auth_service";
 import { app_error } from "@/lib/app_error";
 import { http_status } from "@/lib/http_status";
+import { jwt_utils } from "@/lib/jwt_utils";
+import { cookies } from "next/headers";
 
 // nextjs app router uses two runtimes: edge runtime & node runtime (default: edge)
 // edge runtime -> ultra fast lightweight api BUT no native node apis & limited filesystem access
@@ -22,6 +24,22 @@ export async function POST(request: Request) {
     }
 
     const user = await auth_service.authenticate_user(validation_result.data);
+
+    const token = await jwt_utils.sign_token({
+      user_id: user.id,
+      email: user.email,
+    });
+
+    const cookie_store = await cookies();
+    cookie_store.set({
+      name: "auth_session",
+      value: token,
+      httpOnly: true,     // Prevents JavaScript from reading the cookie
+      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      sameSite: "lax",    // Protects against Cross-Site Request Forgery (CSRF)
+      path: "/",          // Cookie is available across the entire site
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    });
     
     return NextResponse.json(
       { message: "Login successful", user },
