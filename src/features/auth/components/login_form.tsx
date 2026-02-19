@@ -4,8 +4,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login_schema, login_type } from "../validations/auth_schema";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { api_routes, page_routes } from "../constants/app_constants";
 
 export const LoginForm = () => {
+
+    const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -17,7 +21,7 @@ export const LoginForm = () => {
 
   const on_submit = async (data: login_type) => {
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(api_routes.auth.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -31,7 +35,7 @@ export const LoginForm = () => {
       }
 
       alert(`Welcome back, ${result.user.full_name}!`);
-      // Future step: Redirect to dashboard
+      router.push(page_routes.dashboard)
     } catch (error) {
       console.error("Login error:", error);
       alert("Failed to connect to the server.");

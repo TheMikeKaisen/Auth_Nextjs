@@ -2,36 +2,31 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { token_utils } from "@/lib/jwt_utils";
 import { user_repository } from "@/features/auth/repositories/user_respository";
+import { LogoutButton } from "@/features/auth/components/logout_button";
 
 // Ensure this page is never cached statically so the user data is always fresh
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  // 1. Read the secure cookie
   const cookie_store = await cookies();
   const access_token = cookie_store.get("access_token")?.value;
 
-  // 2. If there's no token, kick them back to login instantly
   if (!access_token) {
     redirect("/login");
   }
 
-  // 3. Verify the token using your jose utility
   const decoded_payload = await token_utils.verify_access_token(access_token);
   
   if (!decoded_payload) {
-    // Token is expired or invalid. (If you have middleware setup, this is just a fallback)
     redirect("/login");
   }
 
-  // 4. Fetch the user's details using the ID from the token payload
   const user = await user_repository.find_by_id(decoded_payload.user_id);
 
   if (!user) {
     redirect("/login");
   }
 
-  // 5. Render the UI
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
@@ -44,10 +39,7 @@ export default async function DashboardPage() {
               </h1>
             </div>
             <div className="flex items-center">
-              {/* We will wire this button up to an API route later */}
-              <button className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-                Sign out
-              </button>
+              <LogoutButton />
             </div>
           </div>
         </div>

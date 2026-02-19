@@ -4,8 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sign_up_schema, sign_up_type } from "../validations/auth_schema";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { api_routes, page_routes } from "../constants/app_constants";
 
 export const SignUpForm = () => {
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -17,7 +20,7 @@ export const SignUpForm = () => {
 
   const on_submit = async (data: sign_up_type) => {
   try {
-    const response = await fetch("/api/auth/sign_up", {
+    const response = await fetch(api_routes.auth.sign_up, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -31,6 +34,7 @@ export const SignUpForm = () => {
     }
 
     alert("Account created successfully!");
+    router.push(page_routes.dashboard)
   } catch (error) {
     console.error("Submission error:", error);
     alert("Failed to connect to the server.");
