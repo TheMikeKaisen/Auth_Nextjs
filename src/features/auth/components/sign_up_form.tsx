@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { sign_up_schema, sign_up_type } from "../validations/auth_schema";
+import Link from "next/link";
 
 export const SignUpForm = () => {
   const {
@@ -132,6 +133,15 @@ export const SignUpForm = () => {
         >
           {isSubmitting ? "Creating account..." : "Sign up"}
         </button>
+        <div className="mt-6 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link 
+            href="/login" 
+            className="font-medium text-gray-900 hover:text-blue-600 hover:underline transition-colors"
+          >
+            Login
+          </Link>
+        </div>
       </form>
     </div>
   );

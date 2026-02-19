@@ -1,9 +1,16 @@
 import { db_pool } from "@/lib/db_client";
 import { RowDataPacket } from "mysql2/promise";
 
+export interface user_db_row extends RowDataPacket {
+  id: string;
+  full_name: string;
+  email: string;
+  password_hash: string;
+}
+
 export const user_repository = {
   find_by_email: async (email: string) => {
-    const [rows] = await db_pool.execute<RowDataPacket[]>(
+    const [rows] = await db_pool.execute<user_db_row[]>(
       "SELECT id FROM user_account WHERE email = ?",
       [email]
     );
@@ -15,5 +22,13 @@ export const user_repository = {
       "INSERT INTO user_account (id, full_name, email, password_hash) VALUES (?, ?, ?, ?)",
       [id, full_name, email, password_hash]
     );
+  },
+
+  find_user_for_login: async (email: string) => {
+    const [rows] = await db_pool.execute<user_db_row[]>(
+      "SELECT id, full_name, email, password_hash FROM user_account WHERE email = ?",
+      [email]
+    );
+    return rows.length > 0 ? rows[0] : null;
   },
 };

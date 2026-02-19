@@ -20,4 +20,11 @@ export const sign_up_schema = z.object({
   path: ["confirm_password"], 
 });
 
+// Add this below your existing sign_up_schema
+export const login_schema = z.object({
+  email: z.email("Please enter a valid email address").min(1, "Email is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type login_type = z.infer<typeof login_schema>;
 export type sign_up_type = z.infer<typeof sign_up_schema>;
