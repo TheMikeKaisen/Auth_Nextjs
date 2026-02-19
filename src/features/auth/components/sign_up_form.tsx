@@ -15,10 +15,28 @@ export const SignUpForm = () => {
   });
 
   const on_submit = async (data: sign_up_type) => {
-    // Simulating an API call for the form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Form validated and submitted:", data);
-  };
+  try {
+    const response = await fetch("/api/auth/sign_up", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      // You can trigger a toast notification here
+      alert(result.error || "Something went wrong");
+      return;
+    }
+
+    alert("Account created successfully!");
+    // Redirect user to login or dashboard here
+  } catch (error) {
+    console.error("Submission error:", error);
+    alert("Failed to connect to the server.");
+  }
+};
 
   return (
     <div className="w-full max-w-md p-8 bg-white border border-gray-200 rounded-lg shadow-sm">

@@ -1,0 +1,22 @@
+version: '3.8' # compose specifications of 3.8 version: stable and supports volume, networks,restart policies, etc
+
+# docker automatically creates an internal networking and DNS system
+
+# you can run multiple containers using docker compose file
+# All the containers you want go inside services file.
+services:
+  mysql_db: # name of the container/service
+    image: mysql:8.0
+    restart: always # if container crashes somehow, restart automatically
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: auth_project_db # name of the database
+    ports: # port mapping
+      - "3306:3306" # left side -> machine port & right side -> container port
+    volumes: # creates persistant storage
+      - mysql_data:/var/lib/mysql
+
+volumes: # top level volume
+  # volumes inside the services are references
+  # top level volume declares it
+  mysql_data:
