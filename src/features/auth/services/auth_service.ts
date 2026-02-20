@@ -2,7 +2,7 @@ import { compare, hash } from "bcryptjs";
 import crypto from "crypto";
 
 import { login_type, sign_up_type } from "../validations/auth_schema";
-import { user_repository } from "../repositories/user_respository";
+import { user_repository } from "../repositories/user_repository";
 import { app_error } from "@/lib/app_error";
 import { auth_error_type } from "../constants/auth_errors";
 import { http_status } from "@/lib/http_status";

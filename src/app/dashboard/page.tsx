@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { token_utils } from "@/lib/jwt_utils";
-import { user_repository } from "@/features/auth/repositories/user_respository";
+import { user_repository } from "@/features/auth/repositories/user_repository";
 import { LogoutButton } from "@/features/auth/components/logout_button";
 
 // Ensure this page is never cached statically so the user data is always fresh
